@@ -6,21 +6,38 @@
 		// the `slug` parameter is available because this file
 		// is called [slug].svelte
 		const { game_id } = page.params;
-		//const res = await this.fetch(`blog/${slug}.json`);
-		//const article = await res.json();
+		const res = await this.fetch(`/api/games/${game_id}`, {
+			headers: "Accept: application/json"
+		});
+		const game = await res.json();
+		console.log(game);
 
-		return { game_id };
+		return { game };
 	}
 </script>
 
 <script>
-	export let game_id;
+	import { afterUpdate } from 'svelte';
+	import QRCode from 'qrcode';
+
+	let canvasElement
+	let game
+
+	afterUpdate(() => {
+		const link = 'https://' + location.hostname + '/game/' + game_id + '/play';
+		QRCode.toCanvas(canvasElement, link, (err) => console.log(err));
+	});
 </script>
 
 <svelte:head>
 	<title>Game lobby</title>
 </svelte:head>
 
-<h1>Game page {game_id}</h1>
+<img src='/world.svg' class='map center-and-fit' alt='World map' />
+<ul class='pops'>
+	{#each game.availablePops as pop }
+	<li style={ left: pop.left, right: pop.right } title={pop.name}></li>
+	{/each}
+</ul>
 
-<p>This is the 'about' page. There's not much here.</p>
+<canvas bind:this={canvasElement} />

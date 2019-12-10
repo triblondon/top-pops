@@ -23,7 +23,7 @@ const app = express();
 const games = new Map();
 const recentEvents = [];
 
-app.use(express.static(path.join(__dirname, '../static')));
+app.use(express.static('static'));
 app.use(bodyParser.text({ type: "text/*", limit: 1024 }));
 app.use(bodyParser.json());
 
@@ -32,7 +32,7 @@ app.disable('etag');
 
 app.use((req, res, next) => {
   res.set({
-    'Content-Security-Policy': "default-src 'self'",
+    //'Content-Security-Policy': "default-src 'self'",
     'X-Frame-Options': "SAMEORIGIN",
     'X-XSS-Protection': "1",
     'X-Content-Type-Options': "nosniff",
