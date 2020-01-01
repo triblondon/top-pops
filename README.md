@@ -2,7 +2,7 @@
 
 This app is the Top of the POPs game, intended to be used to provide a fun and engaging way to learn about Fastly at trade shows and developer conferences.  It is to be displayed on a large screen at the booth.  Players will interact with the game on their own personal device.
 
-![Screenshot]("screenshot.png")
+![Screenshot](screenshot.png)
 
 We show a world map with Fastly POPs (data centers) marked (similar to [fastly.com/network](fastly.com/network) but animated) and a QR code to use to join.  The first player who joins gets allocated a POP randomly (eg 'Singapore'), and gets to choose a metric (such as 'HTTP/2 adoption').  The second and subsequent players to join get to choose a POP to play against the first player (and will aim to choose a POP that exhibits a better performance on the metric the game will test, so in this case player 2 tries to guess which Fastly POP location might have a better HTTP/2 adoption than Singapore).
 
@@ -72,7 +72,7 @@ document.body.innerText
 ;
 ```
 
-## TODO
+## TODO
 
 [ ] Favicon
 [ ] Better design for POP confirm view
