@@ -3,6 +3,7 @@
 	import METRICS from '../data/metrics.js';
 	import POPMap from './POPMap.svelte';
 	import PlayerButton from './PlayerButton.svelte';
+	import Icon from './Icon.svelte';
 
 	export let player;
 	export let type;
@@ -45,40 +46,72 @@
 
 <style>
 .chooser {
-	list-style: none;
-	position: relative;
-	height: 70vh;
+  list-style: none;
+  margin: 4em 2em 2em 2em;
+	padding: 0;
+}
+.chooser .help {
+  position: absolute;
+  top: 0.5em;
+  left: 0;
+  right: 0;
+  text-align: center;
 }
 .chooser li {
 	display: none;
 }
 .chooser li.selected {
 	display: flex;
-	width: 100%;
-	height: 100%;
 }
-.chooser-media {
-	flex: 0 0 50%;
-	background: #444;
-	background-size: cover;
-	background-position: center;
-	color: white;
-	margin-right: 2vw;
-	padding: 40px;
-	box-sizing: border-box;
+
+.media-panel {
+  padding: 2em;
+  display: flex;
+  align-items: center;
+  min-height: 13em;
 }
-.new-player > .avatar {
-	float: left;
-	width: 30%;
+.media-panel > .media-item,
+.media-panel > .card {
+  width: 30%;
+  flex: 0 0 30%;
+  margin-right: 1em;
 }
-.new-player .name {
-	font-size: 6vh;
+.media-panel .title {
+  font-size: 1.5em;
 }
+
+.media-item {
+  border: 2px solid black;
+  border-radius: 2%;
+  background: white;
+}
+.media-item img {
+  width: 100%;
+}
+.media-item p {
+  font-size: 0.9em;
+  text-align: center;
+  font-weight: bold;
+}
+.card {
+  background: #444;
+  color: white;
+  display: flex;
+  align-self: stretch;
+  align-items: center;
+	justify-content: center;
+}
+.card span {
+  font-size: 3em;
+  line-height: 1;
+  text-align: center;
+}
+
 .opponents {
 	list-style: none;
 }
 .opponents > li > .avatar {
-	width: 100px;
+	width: 2em;
 	display: inline-block;
 	vertical-align: middle;
 }
@@ -86,40 +119,52 @@
 </style>
 
 {#if stage === 'init' }
-	<h1>New player!</h1>
-	<div class='new-player panel'>
-		<img class='avatar' alt='Cute monster' src='/avatars/{player.avatar}.svg' />
-		<p class='name'>{player.name}</p>
-		{#if type === 'first' }
-			<p>You're the first one here! First, we're going to choose a Fastly edge data center location for you.  Then, <strong>you</strong> get to choose a metric to play for.</p>
-		{:else}
-			<p>This game is about <strong>{metric.name}</strong>.  You're playing against:</p>
-			<ul class='opponents'>
-			{#each game.players.filter(p => p.id !== player.id) as opponent }
-				<li><img class='avatar' alt='Cute monster' src='/avatars/{opponent.avatar}.svg' /> <strong>{opponent.name}</strong> in <strong>{POPS.find(p => p.code === opponent.pop).name}</strong></li>
-			{/each}
-			</ul>
-			<p>Now you need to choose a Fastly edge data center location, which you think can score better than your opponents on {metric.name}!</p>
-		{/if}
-		<p>Press <PlayerButton>OK</PlayerButton> on your phone.</p>
+	<div class='media-panel'>
+    <div class='media-item'>
+		  <img alt='Cute monster' src='/avatars/{player.avatar}.svg' />
+		  <p>{player.name}</p>
+    </div>
+    <div class='info'>
+      {#if type === 'first' }
+        <p>You're the first one here!</p>
+        <p>We're going to allocate you a Fastly data center.<br />Then, <strong>you</strong> get to choose a metric to play for.</p>
+  		  <p>Press <PlayerButton>OK</PlayerButton> on your phone to <strong>roll for a data center</strong>.</p>
+      {:else}
+        <p>This game is about <strong>{metric.name}</strong>.  You're playing against:</p>
+        <ul class='opponents'>
+        {#each game.players.filter(p => p.id !== player.id) as opponent }
+          <li><img class='avatar' alt='Cute monster' src='/avatars/{opponent.avatar}.svg' /> <strong>{opponent.name}</strong> in <strong>{POPS.find(p => p.code === opponent.pop).name}</strong></li>
+        {/each}
+        </ul>
+        <p>You need to choose a Fastly data center, which you think can score better than your opponents on {metric.name}!</p>
+  		  <p>Press <PlayerButton>OK</PlayerButton> on your phone to <strong>choose a data center</strong>.</p>
+      {/if}
+    </div>
 	</div>
 
 {:else if stage === 'pop-spin' }
-	<h1>Let's choose an edge data center...</h1>
-	<POPMap selectedPop={player.pop} on:popSelected={select} /> <!-- TODO fire select only if state===pop-spin -->
+	<POPMap selectedPop={player.pop} on:popSelected={() => { if (stage === 'pop-spin') select(); } } />
 
 {:else if stage === 'pop-confirm' }
-	<h1>Congrats!  You got {pop.name}</h1>
-  <p><img alt='{pop.name}' src='/pops/{pop.code}.png' /></p>
-	<p>Press <PlayerButton>OK</PlayerButton> on your phone</p>
+  <div class='media-panel'>
+    <div class='media-item'>
+		  <img alt='City image' src='/pops/{pop.code}.png' />
+		  <p>{pop.name}</p>
+    </div>
+    <div class='info'>
+      <p class='title'>You'll be playing as {pop.name}</p>
+      <p>Which metric will be particularly good here?<br/><strong>You have to decide</strong> what to play for!</p>
+      <p>Press <PlayerButton>OK</PlayerButton> on your phone to choose one.</p>
+    </div>
+  </div>
 
 {:else if stage === 'choose-metric' }
-	<h1>Pick a metric!</h1>
-	<ul class='chooser panel'>
+	<ul class='chooser'>
+    <div class='help'>Press <PlayerButton><Icon id='left' /></PlayerButton> and <PlayerButton><Icon id='right' /></PlayerButton> on your phone to see your options</div>
 		{#each options as o }
-			<li class={pick(options, chooserIndex) === o ? 'selected' : ''}>
-				<div class='chooser-media'><h2>{o.name}</h2></div>
-				<div class='chooser-detail'>
+			<li class='media-panel {pick(options, chooserIndex) === o ? 'selected' : ''}'>
+				<div class='card'><span>{o.name}</span></div>
+				<div class='info'>
           <p><strong>{o.strap}</strong></p>
           <p>{o.description}</p>
         </div>
@@ -128,13 +173,15 @@
 	</ul>
 
 {:else if stage === 'choose-pop' }
-	<h1>Pick a Fastly data center!</h1>
-	<ul class='chooser panel'>
+	<ul class='chooser'>
+    <div class='help'>Press <PlayerButton><Icon id='left' /></PlayerButton> and <PlayerButton><Icon id='right' /></PlayerButton> on your phone to see your options</div>
 		{#each options as o }
-			<li class={pick(options, chooserIndex) === o ? 'selected' : ''}>
-				<div class='chooser-media' style='background-image: url(/pops/{o.code}.png)'></div>
-				<div class='chooser-detail'>
-					<h2>{o.name}</h2>
+			<li class='media-panel {pick(options, chooserIndex) === o ? 'selected' : ''}'>
+				<div class='media-item'>
+          <img alt='City image' src='/pops/{o.code}.png' />
+          <p>{o.name}</p>
+        </div>
+				<div class='info'>
 					<p>Fastly cache servers: {o.nodes}</p>
 					<p>People within 500km: {o.areaPop}</p>
 				</div>

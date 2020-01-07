@@ -2,6 +2,9 @@
   "name": "top-pops",
   "description": "Top of the POPs game",
   "version": "0.0.1",
+  "engines": {
+    "node": "12.x"
+  },
   "scripts": {
     "dev": "sapper dev",
     "build": "sapper build --legacy",

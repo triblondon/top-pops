@@ -26,7 +26,7 @@
 	let gameData = {};
 	let playerControlledComponent;
 
-  $: activePlayer = game.players.find(p => p.id === game.activePlayer);
+  $: activePlayer = game.players && game.players.find(p => p.id === game.activePlayer);
   $: metric = game.metric && METRICS.find(m => m.code === game.metric);
 	$: console.log("game update", game);
 
@@ -54,58 +54,89 @@
 </script>
 
 <style>
-.qr {
+.panels {
+  margin: 0 auto;
+  width: 100%;
+  height: 100%;
+  max-width: 177vh; /* 16:9 */
+  max-height: 56.2vw; /* 16:9 */
+  font-size: calc(min(177vh, 100vw) / 50); /* Font size scales consistently with 16:9 aspect */
+	overflow: hidden;
+  position: relative;
+  padding: 0;
+}
+.panels > * {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+
+.join-instructions {
 	position: absolute;
-	bottom: 5vh;
-  left: 5vh;
+	bottom: 2em;
+  left: 2em;
   display: flex;
   align-items: center;
 }
-.qr .code {
-  margin-right: 1vw;
+.join-instructions .qr {
+  margin-right: 1em;
+  width: 5em;
+  height: 5em;
 }
 
 .countdown {
 	position: absolute;
-	bottom: 5vh;
-	right: 5vh;
-	font-size: 6vh;
+	bottom: 3em;
+	right: 2em;
+	font-size: 1.5em;
 }
 </style>
 
-<BackgroundCircuits />
+<div class='panels'>
+  <div><BackgroundCircuits /></div>
 
-{#if game.state === GAMESTATE_INIT}
-	<POPMap players={game.players} />
-	{#if game.players.length < MAX_PLAYERS}
-		<div class='qr'>
-      <div class='code'>
-        <QRCode gameId={game.id} />
-      </div>
-      <div class='strap'>
-        Play <strong>Top of the POPs</strong><br/>
-        Scan to join!
+  {#if game.state === GAMESTATE_INIT}
+    <div><POPMap players={game.players} /></div>
+    <div>
+      <div class='labels'>
+        {#if game.players.length < MAX_PLAYERS}
+          <div class='join-instructions'>
+            <div class='qr'>
+              <QRCode gameId={game.id} alt="Click to play" />
+            </div>
+            <div class='strap'>
+              Play <strong>Top of the POPs</strong><br/>
+              Scan to join!
+            </div>
+          </div>
+        {/if}
+        {#if game.players.length >= MIN_PLAYERS }
+          <div class='countdown'>Game starting in <Countdown duration={START_COUNTDOWN_TIME} on:zero={handleStartGame} />...</div>
+        {/if}
       </div>
     </div>
-	{/if}
-	{#if game.players.length >= MIN_PLAYERS }
-		<div class='countdown'>Game starting in <Countdown duration={START_COUNTDOWN_TIME} on:zero={handleStartGame} />...</div>
-	{/if}
+  {:else if activePlayer && game.state === GAMESTATE_NEWPLAYER }
+    <div>
+      <PlayerEnrolment type={!game.metric ? 'first' : 'normal'} player={activePlayer} {game} bind:this={playerControlledComponent} />
+    </div>
 
-{:else if activePlayer && game.state === GAMESTATE_NEWPLAYER }
-	<PlayerEnrolment type={!game.metric ? 'first' : 'normal'} player={activePlayer} {game} bind:this={playerControlledComponent} />
+  {:else if game.state === GAMESTATE_PLAYING }
+    <div>
+      <Race players={game.players} metricCode={game.metric} duration={GAME_DURATION_MS/1000} currentData={gameData} />
+    </div>
 
-{:else if game.state === GAMESTATE_PLAYING }
-	<Race players={game.players} metricCode={game.metric} duration={GAME_DURATION_MS/1000} currentData={gameData} />
-
-{:else if game.state === GAMESTATE_FINISHED }
-	<h1>Winner!</h1>
-	<img class='avatar' alt='Cute monster' src='/avatars/{game.players.find(p => p.pop === game.winningPop).avatar}.svg' />
-	<p>Show your phone to claim your prize!</p>
-  <h2>About {metric.name}</h2>
-  <p><strong>{metric.strap}</strong></p>
-  <p>{metric.description}</p>
-	<p>Resetting in <Countdown duration=20 on:zero={handleReset} /></p>
-
-{/if}
-
+  {:else if game.state === GAMESTATE_FINISHED }
+    <div>
+      <h1>Winner!</h1>
+      <img class='avatar' alt='Cute monster' src='/avatars/{game.players.find(p => p.pop === game.winningPop).avatar}.svg' />
+      <p>Show your phone to claim your prize!</p>
+      <h2>About {metric.name}</h2>
+      <p><strong>{metric.strap}</strong></p>
+      <p>{metric.description}</p>
+      <p>Resetting in <Countdown duration=20 on:zero={handleReset} /></p>
+    </div>
+  {/if}
+</div>

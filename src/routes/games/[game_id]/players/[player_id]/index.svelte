@@ -8,6 +8,7 @@
 <script>
 	import { onMount, beforeUpdate } from 'svelte';
 	import { GAMESTATE_INIT, GAMESTATE_NEWPLAYER, GAMESTATE_PLAYING, GAMESTATE_FINISHED, GAMESTATE_DEAD } from '../../../../../constants.js';
+	import Icon from '../../../../../components/Icon.svelte';
 
 	let gameStream
 
@@ -34,8 +35,18 @@
 </script>
 
 <style>
+.player-control,
+.player-message {
+  display: grid;
+	grid-gap: 2vw;
+	max-width: 500px;
+	margin: 0 auto;
+  height: 100%;
+  width: 100%;
+	padding: 1vw;
+	box-sizing: border-box;
+}
 .player-control {
-	display: grid;
 	grid-template-columns: 1fr 1fr;
 	grid-template-rows: min-content 1fr 1fr;
 	grid-template-areas:
@@ -43,25 +54,41 @@
 		"prev next"
 		"select select"
 	;
-	grid-gap: 1vw;
-	max-width: 500px;
-	margin: 0 auto;
-	height: 100%;
-	padding: 1vw 0;
-	box-sizing: border-box;
 }
+.player-message {
+	grid-template-columns: 1fr;
+	grid-template-rows: min-content 1fr;
+	grid-template-areas:
+		"id"
+		"message"
+	;
+}
+
 .player-id {
 	grid-area: id;
-	display: flex;
-	align-items: center;
 }
-.name {
-	font-size: 32px;
+
+.media-item {
+  border: 2px solid black;
+  border-radius: 0.3em;
+  background: white;
+  display: flex;
+  align-items: center;
+  padding: 0.4em;
+  width: 100%;
+  box-sizing: border-box;
 }
-.player-id .avatar {
-	float: left;
-	margin-right: 20px;
+.media-item img {
+  width: 5em;
+  margin-right: 1em;
 }
+.media-item p {
+  font-size: 1.5em;
+  text-align: center;
+  font-weight: bold;
+  margin: 0
+}
+
 .nav-button-prev {
 	grid-area: prev;
 }
@@ -71,12 +98,22 @@
 .select-button {
 	grid-area: select;
 }
+.message {
+  grid-area: message;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1em;
+}
+
 button {
 	display: flex;
 	align-content: center;
 	justify-content: center;
 	font-size: 5vh;
-	border: 1px dashed #2b2b2b;
+	border: 1px solid #2b2b2b;
 	background: #f7e9e9;
 	border-radius: 5px;
 	padding: 20%;
@@ -84,50 +121,45 @@ button {
 button:active {
 	background: #ffa4a4;
 }
-button svg {
-	max-width: 100%;
-	width: 100%;
-	height: 100%;
-}
 </style>
 
 {#if game.state === GAMESTATE_NEWPLAYER && isActive}
 	<div class='player-control'>
 		<div class='player-id'>
-			<img class='avatar' alt='Cute monster' src='/avatars/{player.avatar}.svg' />
-			<div class='name'>{player.name}</div>
+      <div class='media-item'>
+			  <img class='avatar' alt='Cute monster' src='/avatars/{player.avatar}.svg' />
+			  <p>{player.name}</p>
+      </div>
 		</div>
 		<button class='nav-button nav-button-prev' on:click={handlePrev}>
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 0 80 105">
-					<g>
-						<path d="M68.7 2.5c2.6 0 5.1 1 7.1 2.9a10 10 0 010 14.2L45.5 50l30.4 30.4a10 10 0 010 14.2 10 10 0 01-14.2 0L24.2 57.1c-1.9-1.9-2.9-4.4-2.9-7.1s1.1-5.2 2.9-7.1L61.6 5.4c2-1.9 4.6-2.9 7.1-2.9z"/>
-					</g>
-			</svg>
+			<Icon id='left' />
 		</button>
 		<button class='nav-button nav-button-next' on:click={handleNext}>
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 0 80 105">
-				<g>
-					<path d="M31.3 97.5c-2.6 0-5.1-1-7.1-2.9a10 10 0 010-14.2L54.5 50 24.2 19.6a10 10 0 010-14.2 10 10 0 0114.2 0l37.5 37.5c1.9 1.9 2.9 4.4 2.9 7.1s-1.1 5.2-2.9 7.1L38.4 94.6c-2 1.9-4.6 2.9-7.1 2.9z"/>
-				</g>
-			</svg>
+			<Icon id='right' />
 		</button>
 		<button class='nav-button select-button' on:click={handleSelect}>OK</button>
 	</div>
 
-{:else if game.state === GAMESTATE_PLAYING }
-	<p>Playing!</p>
-
-{:else if game.state === GAMESTATE_FINISHED && game.winningPop !== player.pop }
-	<p>The game is finished, and sadly, you didn't win this time :-(</p>
-
-{:else if game.state === GAMESTATE_FINISHED && game.winningPop === player.pop }
-	<h1>You win!</h1>
-	<p><img class='avatar' alt='Cute monster' src='/avatars/{player.avatar}.svg' /></p>
-	<p>Show your phone to claim your prize!</p>
-
-{:else if game.state === GAMESTATE_DEAD }
-	<p>The game is over.  Feel free to close this browser window.</p>
-
-{:else}
-	<p>Please look at the big screen!</p>
+{:else }
+  <div class='player-message'>
+    <div class='media-item player-id'>
+      <img class='avatar' alt='Cute monster' src='/avatars/{player.avatar}.svg' />
+      <p>{player.name}</p>
+    </div>
+    <div class='message'>
+      {#if game.state === GAMESTATE_PLAYING }
+        <p>Playing!  Look at the main screen.</p>
+      {:else if game.state === GAMESTATE_FINISHED && game.winningPop !== player.pop }
+        <p>Sorry you didn't win this round!</p>
+        <p>Look at the main screen for more information.</p>
+      {:else if game.state === GAMESTATE_FINISHED && game.winningPop === player.pop }
+        <h1>You win!</h1>
+        <p>Show your phone to claim your prize!</p>
+      {:else if game.state === GAMESTATE_DEAD }
+        <p>The game is over.<br/>Feel free to close this browser window.</p>
+      {:else}
+        <p>Please look at the main screen!</p>
+      {/if}
+    </div>
+  </div>
 {/if}

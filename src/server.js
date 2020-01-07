@@ -29,7 +29,8 @@ app.use((req, res, next) => {
     'X-XSS-Protection': "1",
     'X-Content-Type-Options': "nosniff",
     'Referer-Policy': "origin-when-cross-origin",
-    'Strict-Transport-Security': "max-age=86400"
+    'Strict-Transport-Security': "max-age=86400",
+    "X-Accel-Buffering": "no" // Disables response buffering on Google App Engine
   });
   next();
 });
@@ -164,6 +165,8 @@ app.post('/api/games/:game_id/end', requireGame, (req, res) => {
 app.get('/api/games/:game_id/stream', requireGame, (req, res) => {
 	req.game.stream.subscribe(req, res);
 });
+
+app.get('/__health', (req, res) => res.end('OK'));
 
 
 
