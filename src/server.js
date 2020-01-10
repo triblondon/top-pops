@@ -64,7 +64,8 @@ function ingest(strData) {
 
 			// Normalise
 			if (metricData.chr === '1') metricData.hittime = null;
-			if (metricData.hittime) metricData.hittime = Number.parseFloat(metricData.hittime / 1000);
+      if (metricData.hittime) metricData.hittime = Number.parseFloat(metricData.hittime / 1000);  // us to ms
+      if (metricData.pace) metricData.pace = Number.parseFloat(metricData.pace / 1024);   // bytes to KB
 
 			// For each game in progress, record the value relevant to that game
       games.forEach(game => {
@@ -187,7 +188,7 @@ const randomBool = (p) => Math.random() < p ? 1 : 0;
 const randomInt = (min, max) => Math.floor(min + (Math.random() * (max - min + 1)));
 const randomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-const LANGS = ['en', 'de', 'jp', 'fr', 'cn'];
+const LANGS = ['en', 'de', 'jp', 'fr', 'cn', 'aa', 'ss', 'ee', 'tt', 'yy', 'gg', 'rr', 'jj', 'ee', 'hh'];
 
 setInterval(async () => {
     const lines = Array(randomInt(1,6)).fill().map(() => (

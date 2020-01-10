@@ -1,10 +1,13 @@
 import * as SSEChannel from 'sse-pubsub';
-import { GAMESTATE_INIT, GAMESTATE_NEWPLAYER, GAMESTATE_PLAYING, GAMESTATE_FINISHED, GAME_DURATION_MS, GAMESTATE_DEAD } from '../constants.js';
+import {
+  GAMESTATE_INIT, GAMESTATE_NEWPLAYER, GAMESTATE_PLAYING, GAMESTATE_FINISHED, GAME_DURATION_MS, GAMESTATE_DEAD,
+  HIGHER_IS_BETTER, LOWER_IS_BETTER
+} from '../constants.js';
 import POPS from '../data/pops.js';
 import METRICS from '../data/metrics.js';
 import Stats, { compare as compareStats }  from './stats/index.js';
 
-const PUBLIC_PROPS = ['id', 'state', 'createdTime', 'startTime', 'eventCount', 'metric', 'players', 'activePlayer', 'result', 'winningPop'];
+const PUBLIC_PROPS = ['id', 'state', 'createdTime', 'startTime', 'eventCount', 'metric', 'players', 'activePlayer', 'results', 'winningPop', 'winningValue'];
 const UPDATE_FREQ = 200;
 const AVATARS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 const NAMES = [
@@ -25,6 +28,7 @@ const NAMES = [
 
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 const randomFrom = arr => arr[Math.floor(Math.random()*arr.length)];
+const isFirst = (a, b, dir) => (dir === HIGHER_IS_BETTER) ? a > b : b > a;
 
 export default class Game {
 	constructor(id) {
@@ -34,8 +38,9 @@ export default class Game {
 		this.createdTime = Date.now();
 		this.startTime = null;
 		this.eventCount = 0;
-		this.result = {};
-		this.winningPop = null;
+		this.results = {};
+    this.winningPop = null;
+    this.winningValue = null;
 		this.metric = null;
 		this.players = [];
 		this.gameTimer = null;
@@ -95,21 +100,29 @@ export default class Game {
 	}
 
 	gameFrame() {
+    const metricDir = METRICS.find(m => m.code === this.metric).winDirection;
 		const data = Object.keys(this.data).reduce((out, popCode) => ({
 			...out,
 			[popCode]: this.data[popCode].getSnapshot()
 		}), {});
-		data.winning = compareStats(this.data, 'snapshot');
-		console.log('data', data);
+    data.winning = compareStats(this.data, 'snapshot', metricDir);
 		this.stream.publish(data, 'running-metrics');
 		if (this.startTime + GAME_DURATION_MS < Date.now()) {
 			clearTimeout(this.gameTimer);
 			this.state = GAMESTATE_FINISHED;
-			this.result = Object.keys(this.data).reduce((out, popCode) => ({
-				...out,
-				[popCode]: this.data[popCode].getAggregate()
-			}), {});
-			this.winningPop = compareStats(this.data, 'aggregate');
+			this.results = Object.keys(this.data).map(popCode => {
+        const { name, avatar } = this.players.find(p => p.pop === popCode);
+        const { name: popName } = POPS.find(p => p.code === popCode);
+        return {
+          popCode,
+          popName,
+          name,
+          avatar,
+          value: this.data[popCode].getAggregate()
+        };
+      }).sort((a, b) => isFirst(a.value, b.value, metricDir) ? -1 : 1);
+      this.winningPop = compareStats(this.data, 'aggregate', metricDir);
+      this.winningValue = this.data[this.winningPop].getAggregate();
 			this.publish();
 		}
 	}

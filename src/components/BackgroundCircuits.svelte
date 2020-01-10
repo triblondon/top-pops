@@ -15,8 +15,8 @@
     const initialWidth = 4;
     const initialLineCount = 4;
     const maxLineCount = 120;
-    const color = 'rgb(230,230,230)';
-    const highlightColor = 'rgb(255,120,120)';
+    const color = 'rgb(235,235,235)';
+    const highlightColor = 'rgb(255,170,170)';
     const bgColor = 'rgb(255,255,255)';
 
     let lines = [];

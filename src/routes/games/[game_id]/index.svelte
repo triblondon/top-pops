@@ -19,6 +19,7 @@
 	import QRCode from '../../../components/QRCode.svelte';
 	import Race from '../../../components/Race.svelte';
 	import PlayerEnrolment from '../../../components/PlayerEnrolment.svelte';
+	import WinningPlayer from '../../../components/WinningPlayer.svelte';
 
 	export let game;
 
@@ -89,7 +90,7 @@
 
 .countdown {
 	position: absolute;
-	bottom: 3em;
+	bottom: 2em;
 	right: 2em;
 	font-size: 1.5em;
 }
@@ -130,13 +131,7 @@
 
   {:else if game.state === GAMESTATE_FINISHED }
     <div>
-      <h1>Winner!</h1>
-      <img class='avatar' alt='Cute monster' src='/avatars/{game.players.find(p => p.pop === game.winningPop).avatar}.svg' />
-      <p>Show your phone to claim your prize!</p>
-      <h2>About {metric.name}</h2>
-      <p><strong>{metric.strap}</strong></p>
-      <p>{metric.description}</p>
-      <p>Resetting in <Countdown duration=20 on:zero={handleReset} /></p>
+      <WinningPlayer {game} on:reset={handleReset} />
     </div>
   {/if}
 </div>

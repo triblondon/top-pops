@@ -9,3 +9,6 @@ export const MAX_PLAYERS = 3;
 
 export const START_COUNTDOWN_TIME = 10;
 export const GAME_DURATION_MS = 30000;
+
+export const HIGHER_IS_BETTER = 'higher';
+export const LOWER_IS_BETTER = 'lower';

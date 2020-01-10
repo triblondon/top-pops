@@ -43,7 +43,7 @@
 	margin: 0 auto;
   height: 100%;
   width: 100%;
-	padding: 1vw;
+	padding: 3vw;
 	box-sizing: border-box;
 }
 .player-control {

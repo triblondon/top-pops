@@ -29,10 +29,10 @@ export default class Duration {
 
 	getSnapshot() {
 		const mean = arrayMean(this.history);
-		return Math.round(mean, 2);
+		return Number.parseFloat(mean.toPrecision(3));
 	}
 
 	getAggregate() {
-		return Math.round(this.data.quantile(0.5), 2);
+		return Number.parseFloat(this.data.quantile(0.5).toPrecision(3));
 	}
 }

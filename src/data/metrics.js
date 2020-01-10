@@ -1,57 +1,68 @@
+import { HIGHER_IS_BETTER, LOWER_IS_BETTER } from '../constants.js';
+
 const metrics = [
   {
     "name": "Cache hit ratio",
     "code": "chr",
     "type": "percentage",
+    "winDirection": HIGHER_IS_BETTER,
     "strap": "Fastly's huge cache storage means higher cache hit ratios",
-    "description": "The percentage of requests which can be answered with a cached response stored within Fastly's edge cloud.  Sometimes a request might find a hit in a second Fastly data center if there is no matching content in the first.  A data center will generally show a higher cache hit ratio if it has a higher proportion of a site's traffic."
+    "description": "How often Fastly responds to a request without sending it to customer origin.  High cache hit ratios are found in larger data centers and where a site's home crowd is"
   }, {
     "name": "Hit time",
     "code": "hittime",
     "type": "milliseconds",
-    "strap": "Fastly can receive a request and start delivering bytes in under a millisecond",
-    "description": "Time between a client opening a connection and Fastly beginning to serve response data in the event of a cache hit.  This reflects the overhead of a request being processed by Fastly and gives an indication of the power of Fastly's edge servers.  Newer generation machines will be faster."
+    "winDirection": LOWER_IS_BETTER,
+    "strap": "Fastly can start delivering bytes in under a millisecond",
+    "description": "Time from a request hitting Fastly until we begin to serve a response.  Faster turnaround happens on newer generation cache servers."
   }, {
     "name": "HTTP/2 adoption",
     "code": "h2",
     "type": "percentage",
-    "strap": "HTTP/2 speeds up your site and spells the end of many performance hacks.",
-    "description": "The percentage of requests received by Fastly over HTTP/2 or HTTP/3, versus the venerable HTTP/1.1 which has been powering the web since 1997.  Adoption of new protocols requires support in the user's device and web browser, but is becoming ubiquitous.  It's hard to buy a new phone or computer today that doesn't come with a browser that supports HTTP/2."
+    "winDirection": HIGHER_IS_BETTER,
+    "strap": "HTTP/2 speeds up your site and kills messy performance hacks",
+    "description": "Requests received by Fastly over HTTP/2 or HTTP/3, versus HTTP/1.1.  Adoption of new protocols requires support in the user's device and web browser, but is becoming ubiquitous.  It's hard to buy a new phone or computer today that doesn't come with a browser that supports HTTP/2."
   }, {
     "name": "IPv6 adoption",
     "code": "ipv6",
     "type": "percentage",
-    "strap": "The world is running out of IPv4, but Fastly fully supports IPv6.",
-    "description": "The percentage of requests received by Fastly on an IPv6 address.  "
+    "winDirection": HIGHER_IS_BETTER,
+    "strap": "The world is running out of IP addresses, but Fastly fully supports IPv6",
+    "description": "The percentage of requests received by Fastly on an IPv6 address.  Some mobile networks provide individual public v6 addresses but group users behind a single IPv4.  In areas where most users are mobile devices, IPv6 gives a more reliable connection and you'll see it more often."
   }, {
     "name": "TLS adoption",
     "code": "tls",
     "type": "percentage",
-    "strap": "In the last decade, the web got 'secure by default'.",
-    "description": "The percentage of requests sent to Fastly over secure connections, versus plain unencrypted HTTP.  Fortunately, site owners are more and more aware of the risks of accepting unencrypted requests, and Fastly can redirect such requests to secure endpoints automatically."
+    "winDirection": HIGHER_IS_BETTER,
+    "strap": "The web is now 'secure by default', so Fastly TLS is free",
+    "description": "Requests sent to Fastly securely, versus plain unencrypted HTTP.  This is higher where website owners have decided to enable TLS, and even higher if the website disallows insecure HTTP - particularly in regions where regulations require secure connections."
   }, {
     "name": "Language diversity",
     "code": "lang",
     "type": "diversity",
-    "strap": "The world doesn't speak with one voice.  Your customers want content in many languages.  How many?",
-    "description": "The number of preferred languages that represent more than 2% of requests received by this data center"
+    "winDirection": HIGHER_IS_BETTER,
+    "strap": "Use Fastly to talk to users in their preferred language",
+    "description": "The number of preferred languages that represent more than 2% of requests received by this data center.  Higher in data centers that serve a user population spread over multiple countries or in countries with multiple popular languages."
   }, {
     "name": "Congestion window size",
     "code": "cwnd",
     "type": "bytes",
-    "strap": "Fastly holds connections to clients for as long as we can",
-    "description": "The average congestion window size on a connection when Fastly finishes delivering a response.  This will be higher in areas where we can reuse connections, where HTTP/2 adoption is higher, and where consumer internet connections are more reliable, eg. where a larger proportion of users are on fixed line connections."
+    "winDirection": HIGHER_IS_BETTER,
+    "strap": "Fastly holds connections open for longer",
+    "description": "The amount of data we allow to be in transit without acknowledgement from the other end.  It starts low, so keeping connections open allows it to expand and the connection gets faster.  Higher in areas where we can reuse connections, eg. where consumer internet connections are more reliable."
   }, {
     "name": "Delivery speed",
     "code": "pace",
-    "type": "bps",
-    "strap": "Fastly always sends bytes to end users as fast as they can receive them",
-    "description": "The rate at which Fastly can send data to end users, in bytes per second.  This is a reflection of the bandwidth avaiable to the end users who are sending requests, since the rate is likely constrained by the network speed of their home or mobile data service.  It will be higher in regions where faster mobile internet infrastructure exists."
+    "type": "kbps",
+    "winDirection": HIGHER_IS_BETTER,
+    "strap": "Fastly sends bytes to users as fast as they can take them",
+    "description": "The speed Fastly can send data to end users, in bytes per second.  The rate is constrained by the network speed of the user's home or mobile data service.  It will be higher in regions with faster mobile internet."
   }, {
     "name": "Round trip time",
     "code": "rtt",
     "type": "milliseconds",
-    "strap": "80% of the world's population is within a 20ms RTT of a Fastly server",
+    "winDirection": LOWER_IS_BETTER,
+    "strap": "80% of the world's population is within 20ms of Fastly",
     "description": "The time in milliseconds required to exchange a message with an end user.  This is higher in areas where a data center serves a larger, more widely dispersed user population, and also where a larger proportion of users are on mobile data connections."
   }
 ];
