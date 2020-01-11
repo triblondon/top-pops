@@ -9,29 +9,33 @@ import METRICS from './data/metrics.js';
 import { GAMESTATE_INIT } from './constants';
 
 const { PORT, NODE_ENV } = process.env;
-const dev = NODE_ENV === 'development';
+const dev = NODE_ENV !== 'production';
 const LOG_EVENT_PATTERN = /^(?<pop>[A-Z]{3}) (?<startTime>\d+) (?<hittime>\d+) (?<h2>[10])(?<ipv6>[10])(?<tls>[10])(?<chr>[10]) (?<lang>[a-z]+) (?<cwnd>[\d]+) (?<pace>[\d]+) (?<rtt>[\d]+)$/;
 
 const app = express();
 const games = new Map();
-
-app.use(express.static('static'));
-app.use(bodyParser.text({ type: "text/*", limit: 1024 }));
-app.use(bodyParser.json());
 
 app.disable('x-powered-by');
 app.disable('etag');
 
 app.use((req, res, next) => {
   res.set({
-    //'Content-Security-Policy': "default-src 'self'",
-    'X-Frame-Options': "SAMEORIGIN",
-    'X-XSS-Protection': "1",
-    'X-Content-Type-Options': "nosniff",
     'Referer-Policy': "origin-when-cross-origin",
     'Strict-Transport-Security': "max-age=86400",
     "X-Accel-Buffering": "no" // Disables response buffering on Google App Engine
   });
+  next();
+});
+
+app.use(express.static('static', { setHeaders: res => {
+  res.set('surrogate-control', dev ? 'no-store, private' : 'max-age=86400');
+  res.set('cache-control', dev ? 'no-store, private' : 'public, max-age=600');
+}}));
+app.use(bodyParser.text({ type: "text/*", limit: 1024 }));
+app.use(bodyParser.json());
+
+app.use((req, res, next) => {
+  res.set('Cache-Control', "no-store, private");
   next();
 });
 
@@ -172,7 +176,7 @@ app.get('/__health', (req, res) => res.end('OK'));
 
 
 app.all('/.well-known/fastly/logging/challenge', (req, res) => {
-  res.end("TODO log challenge response");
+  res.end("f851148928fcd913bb8d2da45d941af7cc7dc3a8201ad671fc525eef54b5988e");
 });
 
 app.use(sapper.middleware());
@@ -190,11 +194,13 @@ const randomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 const LANGS = ['en', 'de', 'jp', 'fr', 'cn', 'aa', 'ss', 'ee', 'tt', 'yy', 'gg', 'rr', 'jj', 'ee', 'hh'];
 
-setInterval(async () => {
-    const lines = Array(randomInt(1,6)).fill().map(() => (
-        `${randomItem(POPS).code} ${Date.now()}000 ${randomInt(100, 1000)} ` +
-        `${randomBool(0.7)}${randomBool(0.4)}${randomBool(0.8)}${randomBool(0.98)} ` +
-        `${randomItem(LANGS)} ${randomInt(10,3000)} ${randomInt(1000000, 9999999)} ${randomInt(500,3000)}`
-    ));
-    ingest(lines.join('\n'));
-}, 15);
+if (dev) {
+  setInterval(async () => {
+      const lines = Array(randomInt(1,6)).fill().map(() => (
+          `${randomItem(POPS).code} ${Date.now()}000 ${randomInt(100, 1000)} ` +
+          `${randomBool(0.7)}${randomBool(0.4)}${randomBool(0.8)}${randomBool(0.98)} ` +
+          `${randomItem(LANGS)} ${randomInt(10,3000)} ${randomInt(1000000, 9999999)} ${randomInt(500,3000)}`
+      ));
+      ingest(lines.join('\n'));
+  }, 15);
+}

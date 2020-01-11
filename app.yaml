@@ -4,14 +4,12 @@ runtime: nodejs
 # allows responses to be streamed, which was needed for the Server-Sent-Events streams in the app
 env: flex
 
-service: top-pops
-
 manual_scaling:
   instances: 1
 
 resources:
   cpu: 1
-  memory_gb: 0.5
+  memory_gb: 4
   disk_size_gb: 10
 
 env_variables:

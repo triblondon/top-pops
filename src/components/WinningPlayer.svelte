@@ -77,7 +77,6 @@
 }
 .results li .result-value {
   flex: 0 0 3em;
-  border: 1px solid #aaa;
   padding: 0.1em;
   text-align: right;
 }
@@ -146,5 +145,5 @@
     <p><strong>{metric.strap}</strong></p>
     <p>{metric.description}</p>
   </div>
-  <div class='reset-timer'>Resetting in <Countdown duration=20 on:zero={() => dispatch('resetxxxxxxxxxxxxx') } /></div>
+  <div class='reset-timer'>Resetting in <Countdown duration=20 on:zero={() => dispatch('reset') } /></div>
 </div>

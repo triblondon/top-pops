@@ -3,6 +3,7 @@
 	import METRICS from '../data/metrics.js';
 	import POPMap from './POPMap.svelte';
 	import PlayerButton from './PlayerButton.svelte';
+	import Scale from './Scale.svelte';
 	import Icon from './Icon.svelte';
 
 	export let player;
@@ -14,7 +15,8 @@
 
 	$: options = type === 'first' ? METRICS : POPS.filter(p => !game.players.some(pl => pl.pop === p.code));
 	$: metric = game.metric && METRICS.find(m => m.code === game.metric);
-	$: pop = player.pop && POPS.find(p => p.code === player.pop);
+  $: pop = player.pop && POPS.find(p => p.code === player.pop);
+  $: currentHourUTC = (new Date()).getUTCHours();
 
 	const pick = (list, idx) => list[idx % list.length];
 
@@ -49,6 +51,7 @@
   list-style: none;
   margin: 4em 2em 2em 2em;
 	padding: 0;
+  width: 100%;
 }
 .chooser .help {
   position: absolute;
@@ -69,6 +72,8 @@
   display: flex;
   align-items: center;
   min-height: 13em;
+  width: 100%;
+  box-sizing: border-box;
 }
 .media-panel > .media-item,
 .media-panel > .card {
@@ -106,6 +111,14 @@
   line-height: 1;
   text-align: center;
 }
+.city-image {
+  width: 100%;
+  padding-top: 75%;
+  height: 0;
+  overflow: hidden;
+  background-size: cover;
+  background-position: 50% 50%;
+}
 
 .opponents {
 	list-style: none;
@@ -115,6 +128,14 @@
 	display: inline-block;
 	vertical-align: middle;
 }
+
+.pop-stats {
+  width: 100%;
+}
+.pop-stats .label {
+  width: 7em;
+}
+
 
 </style>
 
@@ -148,7 +169,7 @@
 {:else if stage === 'pop-confirm' }
   <div class='media-panel'>
     <div class='media-item'>
-		  <img alt='City image' src='/pops/{pop.code}.png' />
+      <div class='city-image' style='background-image: url(/pops/{pop.code}.png)' />
 		  <p>{pop.name}</p>
     </div>
     <div class='info'>
@@ -178,13 +199,15 @@
 		{#each options as o }
 			<li class='media-panel {pick(options, chooserIndex) === o ? 'selected' : ''}'>
 				<div class='media-item'>
-          <img alt='City image' src='/pops/{o.code}.png' />
+          <div class='city-image' style='background-image: url(/pops/{o.code}.png)' />
           <p>{o.name}</p>
         </div>
-				<div class='info'>
-					<p>Fastly cache servers: {o.nodes}</p>
-					<p>People within 500km: {o.areaPop}</p>
-				</div>
+        <table class='pop-stats'>
+          <tr><td class='label'>Cache size</td><td><Scale value={o.size} max={4} /></td></tr>
+          <tr><td class='label'>Population</td><td><Scale value={o.areaPop} max={4} /></td></tr>
+          <tr><td class='label'>Area wealth</td><td><Scale value={o.gdp} max={4} /></td></tr>
+          <tr><td class='label'>Daytime</td><td><Scale value={4-((Math.abs(13 - (currentHourUTC + o.tzOffset))/12)*4)} max={4} /></td></tr>
+				</table>
 			</li>
 		{/each}
 	</ul>
