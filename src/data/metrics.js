@@ -34,7 +34,7 @@ const metrics = [
     "code": "tls",
     "type": "percentage",
     "winDirection": HIGHER_IS_BETTER,
-    "strap": "The web is now 'secure by default', so Fastly TLS is free",
+    "strap": "The web is now 'secure by default'. So is Fastly",
     "description": "Requests sent to Fastly securely, versus plain unencrypted HTTP.  This is higher where website owners have decided to enable TLS, and even higher if the website disallows insecure HTTP - particularly in regions where regulations require secure connections."
   }, {
     "name": "Language diversity",
@@ -46,7 +46,7 @@ const metrics = [
   }, {
     "name": "Congestion window size",
     "code": "cwnd",
-    "type": "bytes",
+    "type": "segs",
     "winDirection": HIGHER_IS_BETTER,
     "strap": "Fastly holds connections open for longer",
     "description": "The amount of data we allow to be in transit without acknowledgement from the other end.  It starts low, so keeping connections open allows it to expand and the connection gets faster.  Higher in areas where we can reuse connections, eg. where consumer internet connections are more reliable."

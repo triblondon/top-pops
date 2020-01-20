@@ -10,6 +10,7 @@
     percentage: '%',
     milliseconds: 'ms',
     diversity: '',
+    segs: '',
     bytes: 'b',
     kbps: 'kbps'
   };

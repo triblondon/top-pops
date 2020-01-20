@@ -1,7 +1,7 @@
 import * as SSEChannel from 'sse-pubsub';
 import {
   GAMESTATE_INIT, GAMESTATE_NEWPLAYER, GAMESTATE_PLAYING, GAMESTATE_FINISHED, GAME_DURATION_MS, GAMESTATE_DEAD,
-  HIGHER_IS_BETTER, LOWER_IS_BETTER
+  HIGHER_IS_BETTER
 } from '../constants.js';
 import POPS from '../data/pops.js';
 import METRICS from '../data/metrics.js';
@@ -11,19 +11,22 @@ const PUBLIC_PROPS = ['id', 'state', 'createdTime', 'startTime', 'eventCount', '
 const UPDATE_FREQ = 200;
 const AVATARS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 const NAMES = [
-	'Professor Beetlejuice',
-	'Captain Cygnus Cache',
-	'Dr Apex Domain',
-	'Marshall Proteus Phoenix',
-	'Major Spdy Scorpulo',
+	'Professor Purge',
+	'Captain Cache',
+	'Dr Domain',
+  'Marshall Traffic',
+  'General Case',
+	'Major Priority',
 	'Count Bandwidth',
-	'President Everest Powerhorn',
-	'Agent Delphinus Peer',
+	'President Powderhorn',
+	'Agent Peer',
 	'Chief Teecie Pee',
 	'Dr Dee Eness',
 	'Agent Origin Shield',
 	'Major Surge',
-	'Director Lupus Latency'
+  'Leutenant Latency',
+  'Senator Syn',
+  'Admiral Ack'
 ];
 
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -31,7 +34,7 @@ const randomFrom = arr => arr[Math.floor(Math.random()*arr.length)];
 const isFirst = (a, b, dir) => (dir === HIGHER_IS_BETTER) ? a > b : b > a;
 
 export default class Game {
-	constructor(id) {
+	constructor(id, eventCallback) {
 		this.id = id;
 		this.stream = new SSEChannel();
 		this.state =  GAMESTATE_INIT;
@@ -46,7 +49,8 @@ export default class Game {
 		this.gameTimer = null;
 		this.activePlayer = null;
 		this.data = [];
-		this.Stat = null;
+    this.Stat = null;
+    this.emit = eventCallback;
 	}
 
 	addPlayer() {
@@ -97,7 +101,15 @@ export default class Game {
 		}), {});
 		this.publish();
 		this.gameTimer = setInterval(this.gameFrame.bind(this), UPDATE_FREQ);
-	}
+  }
+
+  playerSelect() {
+    this.emit('playerSelect');
+  }
+
+  playerNavigate(offset) {
+    this.emit('playerControl', offset);
+  }
 
 	gameFrame() {
     const metricDir = METRICS.find(m => m.code === this.metric).winDirection;
@@ -106,7 +118,7 @@ export default class Game {
 			[popCode]: this.data[popCode].getSnapshot()
 		}), {});
     data.winning = compareStats(this.data, 'snapshot', metricDir);
-		this.stream.publish(data, 'running-metrics');
+		this.emit('gameData', data);
 		if (this.startTime + GAME_DURATION_MS < Date.now()) {
 			clearTimeout(this.gameTimer);
 			this.state = GAMESTATE_FINISHED;
@@ -138,7 +150,7 @@ export default class Game {
 	}
 
 	publish() {
-		this.stream.publish(this.toPublic(), 'gameupdate');
+		this.emit('gameUpdate', this.toPublic());
 	}
 
 	toPublic() {

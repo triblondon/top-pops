@@ -90,8 +90,12 @@
   border-radius: 2%;
   background: white;
 }
-.media-item img {
+.avatar {
   width: 100%;
+  background-size: cover;
+  background-position: center;
+  height: 0;
+  padding-top: 100%;
 }
 .media-item p {
   font-size: 0.9em;
@@ -107,7 +111,7 @@
 	justify-content: center;
 }
 .card span {
-  font-size: 3em;
+  font-size: 2em;
   line-height: 1;
   text-align: center;
 }
@@ -125,6 +129,8 @@
 }
 .opponents > li > .avatar {
 	width: 2em;
+  height: 2em;
+  padding-top: 0;
 	display: inline-block;
 	vertical-align: middle;
 }
@@ -142,7 +148,7 @@
 {#if stage === 'init' }
 	<div class='media-panel'>
     <div class='media-item'>
-		  <img alt='Cute monster' src='/avatars/{player.avatar}.svg' />
+		  <div class='avatar' style='background-image: url(/avatars/{player.avatar}.svg)' />
 		  <p>{player.name}</p>
     </div>
     <div class='info'>
@@ -154,7 +160,7 @@
         <p>This game is about <strong>{metric.name}</strong>.  You're playing against:</p>
         <ul class='opponents'>
         {#each game.players.filter(p => p.id !== player.id) as opponent }
-          <li><img class='avatar' alt='Cute monster' src='/avatars/{opponent.avatar}.svg' /> <strong>{opponent.name}</strong> in <strong>{POPS.find(p => p.code === opponent.pop).name}</strong></li>
+          <li><div class='avatar' style='background-image: url(/avatars/{opponent.avatar}.svg)' /> <strong>{opponent.name}</strong> in <strong>{POPS.find(p => p.code === opponent.pop).name}</strong></li>
         {/each}
         </ul>
         <p>You need to choose a Fastly data center, which you think can score better than your opponents on {metric.name}!</p>

@@ -15,24 +15,24 @@ const arrayMean = arr => arr.reduce((sum, item) => sum + item, 0) / arr.length;
 
 export default class Duration {
 
-	constructor() {
-		this.data = new DataStruct(EPSILON);
-		this.history = [];
-	}
+  constructor() {
+    this.data = new DataStruct(EPSILON);
+    this.history = [];
+  }
 
-	insert(value) {
-		const normalisedValue = Number.parseFloat(value);
-		this.data.insert(normalisedValue);
-		this.history.push(normalisedValue);
-		if (this.history.length > HISTORY_LENGTH) this.history.shift();
-	}
+  insert(value) {
+    const normalisedValue = Number.parseFloat(value);
+    this.data.insert(normalisedValue);
+    this.history.push(normalisedValue);
+    if (this.history.length > HISTORY_LENGTH) this.history.shift();
+  }
 
-	getSnapshot() {
-		const mean = arrayMean(this.history);
-		return Number.parseFloat(mean.toPrecision(3));
-	}
+  getSnapshot() {
+    const mean = arrayMean(this.history);
+    return Number.parseFloat(mean.toPrecision(3));
+  }
 
-	getAggregate() {
-		return Number.parseFloat(this.data.quantile(0.5).toPrecision(3));
-	}
+  getAggregate() {
+    return Number.parseFloat(this.data.quantile(0.5).toPrecision(3));
+  }
 }
