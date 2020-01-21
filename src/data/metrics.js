@@ -42,7 +42,7 @@ const metrics = [
     "type": "diversity",
     "winDirection": HIGHER_IS_BETTER,
     "strap": "Use Fastly to talk to users in their preferred language",
-    "description": "The number of preferred languages that represent more than 2% of requests received by this data center.  Higher in data centers that serve a user population spread over multiple countries or in countries with multiple popular languages."
+    "description": "The number of preferred languages that represent more than 1% of requests received by this data center.  Higher in data centers that serve a user population spread over multiple countries or in countries with multiple popular languages."
   }, {
     "name": "Congestion window size",
     "code": "cwnd",

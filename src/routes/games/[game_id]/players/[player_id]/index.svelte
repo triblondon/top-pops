@@ -20,7 +20,7 @@
 
   onMount(() => {
     gameStream = new EventSource('/api/games/' + game.id + '/stream');
-    gameStream.addEventListener('gameupdate', e => { game = JSON.parse(e.data); });
+    gameStream.addEventListener('game'+game.id+'-gameUpdate', e => { game = JSON.parse(e.data); });
   });
 
   function handlePrev() {

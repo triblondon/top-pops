@@ -13,3 +13,5 @@ export const PLAY_INTRO_MS = 8000;
 
 export const HIGHER_IS_BETTER = 'higher';
 export const LOWER_IS_BETTER = 'lower';
+
+export const MAX_INGEST_PAYLOAD_BYTES = 1024 * 1024;

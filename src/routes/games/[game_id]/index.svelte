@@ -26,6 +26,7 @@
 
   let gameStream;
   let gameData = {};
+  let popStats = {};
   let playerControlledComponent;
   let starting = false;
 
@@ -51,6 +52,9 @@
     });
     gameStream.addEventListener('game'+game.id+'-gameData', e => {
       gameData = JSON.parse(e.data);
+    });
+    gameStream.addEventListener('popStats', e => {
+      popStats = JSON.parse(e.data);
     });
 
     // Receive player button presses
@@ -163,7 +167,7 @@
   <div><BackgroundCircuits /></div>
 
   {#if game.state === GAMESTATE_INIT && !starting}
-    <div><POPMap players={game.players} /></div>
+    <div><POPMap players={game.players} popStats={popStats} /></div>
     <div>
       <div class='labels'>
         {#if game.players.length < MAX_PLAYERS}

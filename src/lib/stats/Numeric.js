@@ -9,7 +9,7 @@
 import { GK as DataStruct } from 'streaming-percentiles';
 
 const EPSILON = 0.1;
-const HISTORY_LENGTH = 10;
+const HISTORY_LENGTH = 20;
 
 const arrayMean = arr => arr.reduce((sum, item) => sum + item, 0) / arr.length;
 
