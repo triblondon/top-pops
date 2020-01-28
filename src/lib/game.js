@@ -53,10 +53,14 @@ export default class Game {
     this.emit = eventCallback;
   }
 
-  addPlayer() {
+  addPlayer(clientId) {
+    const existing = this.players.find(p => p.clientId === clientId);
+    if (existing) return existing;
+    if (this.state !== GAMESTATE_INIT) return null;
+
     const name = randomFrom(NAMES.filter(n => !this.players.some(p => p.name === n)));
     const avatar = randomFrom(AVATARS.filter(a => !this.players.some(p => p.avatar === a)));
-    const player = { id: this.players.length + 1, name, avatar, isConfirmed: false, pop: null };
+    const player = { id: this.players.length + 1, name, clientId, avatar, isConfirmed: false, pop: null };
     this.players.push(player);
     this.activePlayer = player.id;
     this.state = GAMESTATE_NEWPLAYER;

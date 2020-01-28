@@ -1,26 +1,52 @@
 <script context="module">
   export async function preload(page) {
     const game = await this.fetch(`/api/games/${page.params.game_id}`).then(res => res.ok ? res.json() : {});
-    return { game, playerId: Number.parseInt(page.params.player_id) };
+    return { game };
   }
 </script>
 
 <script>
   import { onMount, beforeUpdate } from 'svelte';
-  import { GAMESTATE_INIT, GAMESTATE_NEWPLAYER, GAMESTATE_PLAYING, GAMESTATE_FINISHED, GAMESTATE_DEAD } from '../../../../../constants.js';
-  import Icon from '../../../../../components/Icon.svelte';
+  import { GAMESTATE_INIT, GAMESTATE_NEWPLAYER, GAMESTATE_PLAYING, GAMESTATE_FINISHED, GAMESTATE_DEAD } from '../../../constants.js';
+  import Icon from '../../../components/Icon.svelte';
 
-  let gameStream
+  let gameStream, playerId, clientId;
 
   export let game
-  export let playerId
 
   $: player = game.players.find(p => p.id === playerId);
   $: isActive = game.activePlayer === playerId;
 
+  const getCookie = k => (document.cookie.match('(?:^|[^;]+)\\s*' + k + '\\s*=\\s*([^;]+)') || [])[1];
+  const setCookie = (k, v) => {
+    document.cookie = `${k}=${encodeURIComponent(v)}; path=/; max-age=3600`;
+    return v;
+  };
+  const randStr = () => Math.random().toString(36).substr(2, 5);
+
+  const enrol = async () => {
+    const resp = await fetch(`/api/games/${game.id}/addPlayer`, {
+      method: 'post',
+      body: JSON.stringify({ clientId }),
+      headers: { 'Content-type': 'application/json' }
+    });
+    if (resp.ok) {
+      const respData = await resp.json();
+      if (respData.id) {
+        playerId = respData.id;
+      }
+    }
+  };
+
   onMount(() => {
+    clientId = getCookie('toppops') || setCookie('toppops', randStr());
+
     gameStream = new EventSource('/api/games/' + game.id + '/stream');
-    gameStream.addEventListener('game'+game.id+'-gameUpdate', e => { game = JSON.parse(e.data); });
+    gameStream.addEventListener('game'+game.id+'-gameUpdate', e => {
+      game = JSON.parse(e.data);
+      if (!playerId) enrol();
+    });
+    gameStream.addEventListener('open', enrol);
   });
 
   function handlePrev() {
@@ -142,10 +168,12 @@ button:active {
 
 {:else }
   <div class='player-message'>
-    <div class='media-item player-id'>
-      <img class='avatar' alt='Cute monster' src='/avatars/{player.avatar}.svg' />
-      <p>{player.name}</p>
-    </div>
+    {#if player }
+      <div class='media-item player-id'>
+        <img class='avatar' alt='Cute monster' src='/avatars/{player.avatar}.svg' />
+        <p>{player.name}</p>
+      </div>
+    {/if}
     <div class='message'>
       {#if game.state === GAMESTATE_PLAYING }
         <p>Playing!  Look at the main screen.</p>
@@ -156,10 +184,14 @@ button:active {
         <h1>You win!</h1>
         <p>Show your phone to claim your prize!</p>
       {:else if game.state === GAMESTATE_DEAD }
-        <p>The game is over.<br/>Feel free to close this browser window.</p>
+        <h1>The game is over.</h1>
+        <p>Feel free to close this browser window.</p>
+      {:else if !player }
+        <h1>Please wait...</h1>
       {:else}
         <p>Please look at the main screen!</p>
       {/if}
     </div>
   </div>
+
 {/if}

@@ -1,14 +1,14 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import uuid from 'uuid/v4';
 import * as sapper from '@sapper/server';
 
 import * as GameManager from './lib/game-manager';
 import POPS from './data/pops.js';
-import { GAMESTATE_INIT, MAX_INGEST_PAYLOAD_BYTES } from './constants';
+import { MAX_INGEST_PAYLOAD_BYTES } from './constants';
 
 const { PORT, NODE_ENV } = process.env;
 const dev = NODE_ENV !== 'production';
+const randStr = () => Math.random().toString(36).substr(2, 5);
 
 const app = express();
 
@@ -53,16 +53,8 @@ app.post('/ingest', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  const gameID = uuid().substr(0,6);
+  const gameID = randStr();
   res.redirect('/games/' + gameID);
-});
-
-app.get('/games/:game_id/play', requireGame, (req, res) => {
-  if (req.game.state !== GAMESTATE_INIT) {
-    return res.end("You can't join this game right now.  Reload to try again.");
-  }
-  const player = req.game.addPlayer();
-  res.redirect('/games/' + req.params.game_id + '/players/' + player.id);
 });
 
 // Get game
@@ -82,7 +74,8 @@ app.post('/api/games/:game_id/setMetric', requireGame, (req, res) => {
 
 // Add player
 app.post('/api/games/:game_id/addPlayer', requireGame, (req, res) => {
-  const player = req.game.addPlayer();
+  const player = req.game.addPlayer(req.body.clientId);
+  res.status(player ? 200 : 400);
   res.json(player);
 });
 

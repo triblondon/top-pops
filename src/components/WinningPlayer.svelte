@@ -145,5 +145,5 @@
     <p><strong>{metric.strap}</strong></p>
     <p>{metric.description}</p>
   </div>
-  <div class='reset-timer'>Resetting in <Countdown duration=20 on:zero={() => dispatch('reset') } /></div>
+  <div class='reset-timer' on:click={() => dispatch('reset')}>Resetting in <Countdown duration=20 on:zero={() => dispatch('reset')} /></div>
 </div>
